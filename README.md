@@ -142,21 +142,6 @@ app/
 |                | `POST`   | `/orders/{id}/cancel`                  | Customer     | Hủy đơn hàng                                                  |
 | **Hệ thống**   | `GET`    | `/health`                              | Public       | Kiểm tra trạng thái hoạt động của Backend và kết nối Database |
 
-### Các tham số lọc và phân trang
-
-- `GET /products` hỗ trợ các tham số `keyword`, `min_price`, `max_price`, `in_stock_only` và `sale_state`. `keyword` tìm không phân biệt chữ hoa/thường trong tên và mô tả; khoảng giá áp dụng trên giá Flash Sale. `sale_state` nhận một trong các giá trị `UPCOMING`, `AVAILABLE`, `SOLD_OUT`, `ENDED`, `INACTIVE`. Danh sách hiện chỉ truy vấn sản phẩm `ACTIVE`, nên bộ lọc `INACTIVE` không trả về sản phẩm.
-- `GET /orders` hỗ trợ `status`, `offset` và `limit`. `status` nhận `PENDING`, `CONFIRMED`, `COMPLETED` hoặc `CANCELLED`; `offset` mặc định là 0 và không âm; `limit` mặc định là 20, từ 1 đến 100. Kết quả được sắp xếp theo thời gian tạo mới nhất trước.
-- Người dùng chỉ xem được đơn hàng của chính mình. Các endpoint quản lý sản phẩm yêu cầu quyền Admin.
-- `GET /orders/summary` trả về `total_orders`, `pending_orders`, `completed_orders`, `cancelled_orders` và `total_spent`. `total_spent` không tính các đơn `CANCELLED`, còn `total_orders` vẫn tính cả đơn đã hủy.
-
-### Quy tắc nghiệp vụ chính
-
-- Khi cập nhật sản phẩm, các trường được hỗ trợ gồm `name`, `description`, `original_price`, `flash_sale_price`, `start_time`, `end_time` và `status`. Không cập nhật tồn kho qua endpoint này.
-- Tên sản phẩm sau chuẩn hóa dài từ 1 đến 200 ký tự. Giá phải dương, tối đa hai chữ số thập phân và giá Flash Sale phải thấp hơn giá gốc. Thời gian kết thúc phải sau thời gian bắt đầu khi cả hai cùng được cung cấp. `status` chỉ nhận `ACTIVE` hoặc `INACTIVE`.
-- Điều chỉnh tồn kho dùng body `{"adjustment": số_nguyên}`. Giá trị dương là nhập thêm, giá trị âm là xuất bớt. Không chấp nhận giá trị 0, xuất vượt tồn kho hoặc để tồn kho vượt quá 1.000.000.
-- Khi đặt hàng, hệ thống cập nhật tồn kho với điều kiện số lượng hiện có phải đủ. Nếu ghi đơn thất bại sau bước giữ kho, service thực hiện hoàn kho. Các thao tác giữ kho, ghi đơn và hoàn kho được commit riêng, không phải một transaction nguyên tử bao trùm toàn bộ quy trình.
-- Chỉ chủ đơn mới được hủy và chỉ đơn `PENDING` được hủy. Hệ thống chuyển trạng thái đơn sang `CANCELLED` trước, sau đó hoàn kho. Nếu bước hoàn kho thất bại, yêu cầu trả lỗi; trạng thái đơn đã được commit là `CANCELLED`.
-
 ## 4. Hướng dẫn chạy dự án
 
 ### Cách 1: Sử dụng Docker Compose
