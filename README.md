@@ -11,21 +11,13 @@ Hệ thống phục vụ các chiến dịch bán hàng Flash Sale. Điểm khó
 
 Nghiệp vụ cơ bản:
 
-- Khách hàng có thể xem danh sách, chi tiết sản phẩm Flash Sale và lọc danh sách theo từ khóa, khoảng giá, tình trạng tồn kho hoặc trạng thái chương trình.
-
-- Sản phẩm có thời gian bắt đầu, thời gian kết thúc và trạng thái. Hệ thống xác định trạng thái mở bán dựa trên thời gian, trạng thái sản phẩm và số lượng tồn kho.
-
-- Admin có thể thêm, cập nhật thông tin và xóa sản phẩm. Việc điều chỉnh tồn kho được thực hiện qua chức năng riêng.
-
-- Khách hàng chọn sản phẩm và số lượng muốn mua. Mỗi đơn hàng có tối đa 20 sản phẩm. Hệ thống kiểm tra trạng thái Flash Sale và tồn kho trước khi đặt hàng:
-
-  - Nếu chương trình đang mở bán và còn đủ hàng: Hệ thống giữ số lượng tồn kho và tạo đơn hàng ở trạng thái `PENDING`.
-
-  - Nếu chương trình chưa bắt đầu, đã kết thúc, sản phẩm ngừng bán hoặc hết hàng: Từ chối yêu cầu và trả về lỗi.
-
-- Khách hàng có thể xem danh sách đơn hàng, lọc theo trạng thái, phân trang và xem thống kê đơn hàng của bản thân.
-
-- Khách hàng chỉ có thể hủy đơn hàng ở trạng thái `PENDING`. Khi hủy thành công, số lượng tương ứng được hoàn lại vào kho hàng.
+- Khách hàng có thể duyệt danh sách các mặt hàng đang mở bán và số lượng tồn kho của từng mặt hàng.
+- Khách hàng chọn sản phẩm và số lượng muốn mua. Hệ thống kiểm tra số lượng tồn kho trong CSDL:
+  - Nếu vẫn còn đủ số hàng: Trừ số lượng tương ứng và tạo bản ghi đơn hàng mới.
+  - Nếu hết hàng: Từ chối yêu cầu và trả về lỗi.
+- Khách hàng có thể xem lịch sử đơn hàng, lọc theo trạng thái, phân trang và xem thống kê số đơn, tổng chi tiêu.
+- Khách hàng có thể hủy đơn hàng của mình. Khi đơn hàng bị hủy, số lượng tương ứng sẽ được hoàn lại vào kho hàng.
+- Admin có thể cập nhật thông tin sản phẩm và điều chỉnh tồn kho.
 
 ## 2. Kiến trúc hệ thống
 
@@ -194,14 +186,13 @@ uvicorn app.main:app --reload
 
 ### 5.1. Tổng quan môi trường kiểm thử
 
-- Cấu hình: Kaggle CPU, Accelerator: None, Internet on.
+Cấu hình: Kaggle CPU, Accelerator: None, Internet on.
 
-- Kiểm thử trên endpoint `POST /api/v1/orders`, timeout mỗi request 60 giây.
+Kiểm thử trên endpoint `POST /api/v1/orders`, timeout mỗi request 60 giây.
 
-- Mỗi mức tải được chạy 3 lần độc lập; bảng kết quả ghi khoảng giá trị nhỏ nhất, lớn nhất của 3 lần.
+Mỗi mức tải được chạy 3 lần độc lập; bảng kết quả ghi khoảng giá trị nhỏ nhất, lớn nhất của 3 lần.
 
-- Chỉ số đánh giá:
-
+Chỉ số đánh giá:
   - HTTP 201: số request tạo đơn thành công; HTTP 500: số request server trả lỗi nội bộ.
 
   - Timeout: số request không nhận được phản hồi sau 60 giây.
